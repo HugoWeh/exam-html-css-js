@@ -176,7 +176,7 @@ const Game = () => {
         </>
       ) : (
         <h1 className="text-6xl text-white">
-          {state.deck.length} cartes restantes
+          {state.deck.length} cartes restantes / {state.turn} changements
         </h1>
       )}
       <div className="flex flex-col gap-4 mb-6">
