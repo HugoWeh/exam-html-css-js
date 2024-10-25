@@ -4,13 +4,19 @@ import "./App.css";
 const symbols = ["♥️", "♦️", "♣️", "♠️"];
 const cards = ["7", "8", "9", "10", "J", "Q", "K", "As"];
 
-const initialState = { deck: [], userDeck: [], botDeck: [] };
+const initialState = {
+  deck: [],
+  userDeck: [],
+  userScore: {},
+  botDeck: [],
+  botScore: {},
+};
 
 const App = () => {
   const [state, setState] = useState(initialState);
 
   const ShuffleDeck = () => {
-    if (state.deck.length === 32) {
+    if (state.deck.length === 32 || state.deck.length !== 0) {
       return;
     }
 
@@ -34,7 +40,13 @@ const App = () => {
       return;
     }
 
-    setState((state) => ({ ...state, userDeck: [], botDeck: [] }));
+    setState((state) => ({
+      ...state,
+      userDeck: [],
+      userScore: {},
+      botDeck: [],
+      botScore: {},
+    }));
     for (let i = 0; i < 8; i++) {
       const card = state.deck.pop();
       i % 2 === 0
@@ -47,11 +59,46 @@ const App = () => {
             botDeck: [...state.botDeck, card],
           }));
     }
+    Win();
     return;
   };
 
+  const Win = () => {
+    const userCardValues = state.userDeck.map((card) => card.slice(0, -2));
+    const botCardValues = state.botDeck.map((card) => card.slice(0, -2));
+
+    userCardValues.forEach((value) => {
+      setState((state) => ({
+        ...state,
+        userScore: {
+          ...state.userScore,
+          [value]: (state.userScore[value] || 0) + 1,
+        },
+      }));
+    });
+
+    const counts = Object.values(state.userScore);
+    const maxCount = Math.max(...counts);
+    console.log(counts, maxCount);
+
+    if (maxCount === 4) {
+      console.log("Vous avez un carré!");
+    } else if (maxCount === 3) {
+      console.log("Vous avez un brelan!");
+    } else if (maxCount === 2) {
+      if (counts.filter((count) => count === 2).length === 2) {
+        console.log("Vous avez une double paire!");
+      } else {
+        console.log("Vous avez une paire!");
+      }
+    } else {
+      console.log("Pas de combinaison spéciale!");
+    }
+  };
+
   return (
-    <div className="flex flex-col bg-green-500 w-full h-screen justify-center">
+    <div className="flex flex-col bg-green-500 w-full h-screen items-center justify-center gap-10">
+      <h1 className="text-6xl">{state.deck.length} cartes restantes</h1>
       <div className="flex flex-row gap-6 justify-center mb-6">
         <button
           onClick={ShuffleDeck}
@@ -69,7 +116,7 @@ const App = () => {
           Start Game
         </button>
       </div>
-      <div className="flex flex-row justify-around items-center">
+      <div className="flex flex-row gap-64">
         <div className="flex flex-col items-center">
           <h1 className="text-4xl mb-4">Votre deck</h1>
           <div className="w-full flex flex-row justify-center gap-6">
@@ -78,7 +125,15 @@ const App = () => {
                 key={index}
                 className="flex items-center justify-center w-16 h-24 bg-white border border-gray-400 rounded-lg shadow-lg transition-transform transform hover:scale-105"
               >
-                <span className="text-gray-800">{card}</span>
+                <span
+                  className={`text-${
+                    ["♥️", "♦️"].some((symbol) => card.includes(symbol))
+                      ? "red-500"
+                      : "black"
+                  }`}
+                >
+                  {card}
+                </span>
               </div>
             ))}
           </div>
@@ -91,7 +146,15 @@ const App = () => {
                 key={index}
                 className="flex items-center justify-center w-16 h-24 bg-white border border-gray-400 rounded-lg shadow-lg transition-transform transform hover:scale-105"
               >
-                <span className="text-gray-800">{card}</span>
+                <span
+                  className={`text-${
+                    ["♥️", "♦️"].some((symbol) => card.includes(symbol))
+                      ? "red-500"
+                      : "black"
+                  }`}
+                >
+                  {card}
+                </span>
               </div>
             ))}
           </div>
