@@ -162,6 +162,9 @@ const Game = () => {
 
   return (
     <div className="flex flex-col bg-green-900 w-full h-screen items-center justify-center gap-10 p-5">
+      <h1 className="text-6xl font-bold text-yellow-400 text-center shadow-lg mb-4 animate-fade-in">
+        Simple Poker Game
+      </h1>
       {state.winner ? (
         <>
           <p className="text-3xl font-bold text-center text-white mb-4 animate-pulse">
