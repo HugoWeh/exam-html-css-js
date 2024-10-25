@@ -13,6 +13,8 @@ const initialState = {
   winner: false,
   winStatus: null,
   turn: 4,
+  shuffle: false,
+  pick: false,
 };
 
 const Game = () => {
@@ -32,6 +34,7 @@ const Game = () => {
     setState((state) => ({
       ...state,
       deck: newDeck.sort(() => Math.random() - 0.5),
+      shuffle: true,
     }));
   };
 
@@ -44,6 +47,7 @@ const Game = () => {
       userScore: {},
       botDeck: [],
       botScore: {},
+      pick: true,
     }));
 
     for (let i = 0; i < 8; i++) {
@@ -69,14 +73,18 @@ const Game = () => {
       return;
     }
 
+    const newDeck = [...state.deck];
+    const newCard = newDeck.pop();
+    const newUserDeck = [
+      ...state.userDeck.slice(0, index),
+      newCard,
+      ...state.userDeck.slice(index + 1),
+    ];
+
     setState((state) => ({
       ...state,
-      userDeck: [
-        ...state.userDeck.slice(0, index),
-        state.deck.pop(),
-        ...state.userDeck.slice(index + 1),
-      ],
-      deck: state.deck.slice(0, state.deck.length - 1),
+      userDeck: newUserDeck,
+      deck: newDeck,
       turn: state.turn - 1,
     }));
   };
@@ -153,7 +161,7 @@ const Game = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gradient-to-br from-green-400 to-green-600 w-full h-screen items-center justify-center gap-10 p-5">
+    <div className="flex flex-col bg-green-900 w-full h-screen items-center justify-center gap-10 p-5">
       {state.winner ? (
         <>
           <p className="text-3xl font-bold text-center text-white mb-4 animate-pulse">
@@ -171,27 +179,33 @@ const Game = () => {
           {state.deck.length} cartes restantes
         </h1>
       )}
-      <div className="flex flex-row gap-6 justify-center mb-6">
-        <button
-          onClick={ShuffleDeck}
-          className="p-3 font-bold bg-red-500 hover:bg-red-600 active:bg-red-300 text-white rounded-lg transition shadow-lg"
-        >
-          Mélanger les cartes
-        </button>
-        <button
-          onClick={Pick}
-          className="p-3 font-bold bg-blue-500 hover:bg-blue-600 active:bg-blue-300 text-white rounded-lg transition shadow-lg"
-          disabled={state.winner}
-        >
-          Tirer
-        </button>
-        <button
-          onClick={Keep}
-          className="p-3 font-bold bg-orange-500 hover:bg-orange-600 active:bg-orange-300 text-white rounded-lg transition shadow-lg"
-        >
-          Garder
-        </button>
+      <div className="flex flex-col gap-4 mb-6">
+        <h2 className="text-2xl text-white font-semibold mb-2">Actions</h2>
+        <div className="flex flex-row justify-center gap-6">
+          <button
+            onClick={ShuffleDeck}
+            disabled={state.shuffle}
+            className="p-4 font-bold bg-red-500 hover:bg-red-600 active:bg-red-300 text-white rounded-lg transition shadow-lg w-32"
+          >
+            Mélanger
+          </button>
+          <button
+            onClick={Pick}
+            disabled={state.pick}
+            className="p-4 font-bold bg-blue-500 hover:bg-blue-600 active:bg-blue-300 text-white rounded-lg transition shadow-lg w-32"
+          >
+            Tirer
+          </button>
+          <button
+            onClick={Keep}
+            disabled={!state.pick}
+            className="p-4 font-bold bg-orange-500 hover:bg-orange-600 active:bg-orange-300 text-white rounded-lg transition shadow-lg w-32"
+          >
+            Garder
+          </button>
+        </div>
       </div>
+
       <div className="flex flex-row gap-64">
         <Deck
           title="Votre deck"
