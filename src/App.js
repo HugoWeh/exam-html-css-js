@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 const symbols = ["♥️", "♦️", "♣️", "♠️"];
-const cards = ["7", "8", "9", "10", "J", "Q", "K", "As"];
+const cards = ["7", "8", "9", "10", "J", "Q", "K", "1"];
 
 const initialState = {
   deck: [],
@@ -10,6 +10,7 @@ const initialState = {
   userScore: {},
   botDeck: [],
   botScore: {},
+  winner: false,
 };
 
 const App = () => {
@@ -59,42 +60,53 @@ const App = () => {
             botDeck: [...state.botDeck, card],
           }));
     }
-    Win();
     return;
   };
 
-  const Win = () => {
+  useEffect(() => {
     const userCardValues = state.userDeck.map((card) => card.slice(0, -2));
     const botCardValues = state.botDeck.map((card) => card.slice(0, -2));
 
+    const newUserScore = {};
+    const newBotScore = {};
+
     userCardValues.forEach((value) => {
-      setState((state) => ({
-        ...state,
-        userScore: {
-          ...state.userScore,
-          [value]: (state.userScore[value] || 0) + 1,
-        },
-      }));
+      newUserScore[value] = (newUserScore[value] || 0) + 1;
     });
 
-    const counts = Object.values(state.userScore);
+    botCardValues.forEach((value) => {
+      newBotScore[value] = (newBotScore[value] || 0) + 1;
+    });
+
+    setState((state) => ({
+      ...state,
+      userScore: newUserScore,
+      botScore: newBotScore,
+    }));
+
+    const counts = Object.values(newUserScore);
     const maxCount = Math.max(...counts);
+
     console.log(counts, maxCount);
 
     if (maxCount === 4) {
       console.log("Vous avez un carré!");
+      setState((state) => ({ ...state, winner: true }));
     } else if (maxCount === 3) {
       console.log("Vous avez un brelan!");
+      setState((state) => ({ ...state, winner: true }));
     } else if (maxCount === 2) {
       if (counts.filter((count) => count === 2).length === 2) {
         console.log("Vous avez une double paire!");
+        setState((state) => ({ ...state, winner: true }));
       } else {
         console.log("Vous avez une paire!");
+        setState((state) => ({ ...state, winner: true }));
       }
     } else {
       console.log("Pas de combinaison spéciale!");
     }
-  };
+  }, [state.userDeck, state.botDeck]);
 
   return (
     <div className="flex flex-col bg-green-500 w-full h-screen items-center justify-center gap-10">
@@ -111,6 +123,7 @@ const App = () => {
         <button
           onClick={StartGame}
           className="p-3 font-bold bg-blue-500 hover:bg-blue-600 active:bg-blue-300 text-white rounded-lg transition"
+          disabled={state.winner}
           aria-label="Start the game"
         >
           Start Game
