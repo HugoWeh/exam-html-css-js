@@ -12,7 +12,7 @@ const initialState = {
   botScore: {},
   winner: false,
   winStatus: null,
-  turn: 4,
+  turn: 3,
   shuffle: false,
   pick: false,
 };
