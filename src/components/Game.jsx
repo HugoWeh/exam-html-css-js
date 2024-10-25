@@ -1,5 +1,4 @@
-// src/components/Game.js
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Deck from "./Deck";
 
 const symbols = ["♥️", "♦️", "♣️", "♠️"];
@@ -30,8 +29,8 @@ const Game = () => {
         newDeck.push(card + symbol);
       }
     }
-    setState((prevState) => ({
-      ...prevState,
+    setState((state) => ({
+      ...state,
       deck: newDeck.sort(() => Math.random() - 0.5),
     }));
   };
@@ -39,8 +38,8 @@ const Game = () => {
   const Pick = () => {
     if (state.deck.length === 0) return;
 
-    setState((prevState) => ({
-      ...prevState,
+    setState((state) => ({
+      ...state,
       userDeck: [],
       userScore: {},
       botDeck: [],
@@ -50,13 +49,13 @@ const Game = () => {
     for (let i = 0; i < 8; i++) {
       const card = state.deck.pop();
       i % 2 === 0
-        ? setState((prevState) => ({
-            ...prevState,
-            userDeck: [...prevState.userDeck, card],
+        ? setState((state) => ({
+            ...state,
+            userDeck: [...state.userDeck, card],
           }))
-        : setState((prevState) => ({
-            ...prevState,
-            botDeck: [...prevState.botDeck, card],
+        : setState((state) => ({
+            ...state,
+            botDeck: [...state.botDeck, card],
           }));
     }
   };
@@ -83,45 +82,31 @@ const Game = () => {
   };
 
   useEffect(() => {
-    if (state.turn !== 0) {
-      return;
-    }
+    if (state.turn !== 0) return;
 
-    const getScores = (cardValues) => {
-      const score = {};
-      cardValues.forEach((value) => {
+    const getScores = (deck) =>
+      deck.reduce((score, card) => {
+        const value = card.slice(0, -2);
         score[value] = (score[value] || 0) + 1;
-      });
-      return score;
-    };
+        return score;
+      }, {});
 
-    const newUserScore = getScores(
-      state.userDeck.map((card) => card.slice(0, -2))
-    );
-    const newBotScore = getScores(
-      state.botDeck.map((card) => card.slice(0, -2))
-    );
-
-    setState((state) => ({
-      ...state,
-      userScore: newUserScore,
-      botScore: newBotScore,
-    }));
+    const userScore = getScores(state.userDeck);
+    const botScore = getScores(state.botDeck);
 
     const evaluateWinner = (score, isUser) => {
-      const counts = Object.values(score);
-      const maxCount = Math.max(...counts, 0);
-
-      if (maxCount === 4) {
+      const maxCount = Math.max(...Object.values(score), 0);
+      if (maxCount === 4)
         return isUser
           ? "Vous avez gagné avec un carré"
           : "Bot a gagné avec un carré";
-      } else if (maxCount === 3) {
+      if (maxCount === 3)
         return isUser
           ? "Vous avez gagné avec un brelan"
           : "Bot a gagné avec un brelan";
-      } else if (maxCount === 2) {
-        const pairs = counts.filter((count) => count === 2).length;
+
+      const pairs = Object.values(score).filter((count) => count === 2).length;
+      if (maxCount === 2)
         return isUser
           ? pairs === 2
             ? "Vous avez gagné avec une double paire"
@@ -129,24 +114,36 @@ const Game = () => {
           : pairs === 2
           ? "Bot a gagné avec une double paire"
           : "Bot a gagné avec une paire";
-      }
+
       return null;
     };
 
-    const userWinStatus = evaluateWinner(newUserScore, true);
-    const botWinStatus = evaluateWinner(newBotScore, false);
+    const userWinStatus = evaluateWinner(userScore, true);
+    const botWinStatus = evaluateWinner(botScore, false);
 
-    if (userWinStatus) {
-      setState((prevState) => ({
-        ...prevState,
+    if (userWinStatus || botWinStatus) {
+      setState((state) => ({
+        ...state,
         winner: true,
-        winStatus: userWinStatus,
+        winStatus: userWinStatus || botWinStatus,
       }));
-    } else if (botWinStatus) {
-      setState((prevState) => ({
-        ...prevState,
+    } else {
+      const cardValues = (deck) =>
+        deck.map((card) => cards.indexOf(card.slice(0, -2)));
+      const userHighestCard = Math.max(...cardValues(state.userDeck));
+      const botHighestCard = Math.max(...cardValues(state.botDeck));
+
+      const winStatus =
+        userHighestCard > botHighestCard
+          ? "Vous avez gagné avec la carte la plus forte"
+          : botHighestCard > userHighestCard
+          ? "Bot a gagné avec la carte la plus forte"
+          : "Match nul, les cartes sont égales";
+
+      setState((state) => ({
+        ...state,
         winner: true,
-        winStatus: botWinStatus,
+        winStatus,
       }));
     }
   }, [state.userDeck, state.botDeck, state.turn]);
