@@ -22,6 +22,10 @@ const App = () => {
         }));
       }
     }
+    setState((state) => ({
+      ...state,
+      deck: state.deck.sort(() => Math.random() - 0.5),
+    }));
     return;
   };
 
@@ -65,19 +69,33 @@ const App = () => {
           Start Game
         </button>
       </div>
-      <div className="flex flex-col justify-center items-center">
-        <h1 className="text-4xl mb-4">Votre deck</h1>
-        <div className="w-full flex flex-row justify-center gap-6">
-          {state.userDeck.map((card, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-center w-16 h-24 bg-white border border-gray-400 rounded-lg shadow-lg transition-transform transform hover:scale-105"
-            >
-              <span className="text-gray-800">{card}</span>
-            </div>
-          ))}
+      <div className="flex flex-row justify-around items-center">
+        <div className="flex flex-col items-center">
+          <h1 className="text-4xl mb-4">Votre deck</h1>
+          <div className="w-full flex flex-row justify-center gap-6">
+            {state.userDeck.map((card, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-center w-16 h-24 bg-white border border-gray-400 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              >
+                <span className="text-gray-800">{card}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <h1>Deck de l'ordinateur</h1>
+        <div className="flex flex-col items-center">
+          <h1 className="text-4xl mb-4">Deck de l'ordinateur</h1>
+          <div className="w-full flex flex-row justify-center gap-6">
+            {state.botDeck.map((card, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-center w-16 h-24 bg-white border border-gray-400 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+              >
+                <span className="text-gray-800">{card}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
